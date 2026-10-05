@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Settings — JobConnect{% endblock %}
+{% block content %}
+{% include "dashboard/_sidebar.html" with active="settings" %}
+
+<div class="page-title">
+  <h1 class="h4 mb-1">Settings</h1>
+  <p class="text-muted mb-0 small">Manage your account security.</p>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="jc-card p-4">
+      <h5><i class="bi bi-shield-lock text-primary"></i> Change Password</h5>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="change_password">
+        <div class="mb-3"><label class="form-label">New Password</label>
+          <input type="password" class="form-control" name="password" minlength="8" required></div>
+        <div class="mb-3"><label class="form-label">Confirm New Password</label>
+          <input type="password" class="form-control" name="password2" minlength="8" required></div>
+        <button class="btn btn-primary">Update Password</button>
+      </form>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="jc-card p-4">
+      <h5><i class="bi bi-info-circle text-primary"></i> Account</h5>
+      <table class="table small">
+        <tr><td class="text-muted">Email</td><td class="text-end">{{ user.email }}</td></tr>
+        <tr><td class="text-muted">Username</td><td class="text-end">{{ user.username }}</td></tr>
+        <tr><td class="text-muted">Role</td><td class="text-end">{{ user.get_role_display }}</td></tr>
+        <tr><td class="text-muted">Email verified</td>
+          <td class="text-end">{% if user.is_verified %}<span class="badge-soft-success">Yes</span>{% else %}<span class="badge-soft-warning">Pending</span>{% endif %}</td></tr>
+        <tr><td class="text-muted">Member since</td><td class="text-end">{{ user.created_at|date:"M Y" }}</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% include "dashboard/_sidebar_end.html" %}
+{% endblock %}

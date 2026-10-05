@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Reports — JobConnect Admin{% endblock %}
+{% block content %}
+{% include "dashboard/_sidebar.html" with active="reports" %}
+
+<div class="page-title">
+  <h1 class="h4 mb-1">Reports &amp; Analytics</h1>
+  <p class="text-muted mb-0 small">Platform-wide recruitment analytics.</p>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-lg-6">
+    <div class="jc-card chart-card h-100">
+      <h6><i class="bi bi-graph-up"></i> Applications per Month</h6>
+      <div class="chart-box"><canvas id="barChart"></canvas></div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="jc-card chart-card h-100">
+      <h6><i class="bi bi-grid"></i> Jobs by Category</h6>
+      <div class="chart-box"><canvas id="monthlyChart"></canvas></div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="jc-card chart-card h-100">
+      <h6><i class="bi bi-pie-chart"></i> Application Status</h6>
+      <div class="chart-box"><canvas id="statusChart"></canvas></div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="jc-card p-4 h-100">
+      <h6><i class="bi bi-trophy"></i> Top Companies by Job Postings</h6>
+      <table class="table table-sm align-middle mb-0">
+        <thead><tr><th>Company</th><th>Industry</th><th class="text-end">Jobs</th></tr></thead>
+        <tbody>
+          {% for company in top_companies %}
+            <tr>
+              <td class="small fw-semibold text-dark">{{ company.company_name|truncatechars:26 }}</td>
+              <td class="small text-muted">{{ company.industry|default:"—" }}</td>
+              <td class="text-end"><span class="badge-soft-info">{{ company.n }}</span></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-6">
+    <div class="jc-card p-4">
+      <h6><i class="bi bi-card-checklist"></i> Status Breakdown</h6>
+      {% for s in by_status %}
+        <div class="d-flex justify-content-between border-bottom py-2 small">
+          <span>{{ s.get_status_display|default:s.status }}</span>
+          <strong>{{ s.n }}</strong>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="jc-card p-4">
+      <h6><i class="bi bi-folder"></i> Jobs per Category</h6>
+      {% for row in jobs_by_cat %}
+        <div class="d-flex justify-content-between border-bottom py-2 small">
+          <span>{{ row.category__name|default:"Other" }}</span>
+          <strong>{{ row.n }}</strong>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% include "dashboard/_sidebar_end.html" %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script id="barChartData" type="application/json">{
+  "labels": [{% for row in apps_by_month %}"{{ row.label }}"{% if not forloop.last %},{% endif %}{% endfor %}],
+  "values": [{% for row in apps_by_month %}{{ row.n }}{% if not forloop.last %},{% endif %}{% endfor %}],
+  "label": "Applications"
+}</script>
+<script id="monthlyChartData" type="application/json">{
+  "labels": [{% for row in jobs_by_cat %}"{{ row.category__name|default:'Other' }}"{% if not forloop.last %},{% endif %}{% endfor %}],
+  "series1": [{% for row in jobs_by_cat %}{{ row.n }}{% if not forloop.last %},{% endif %}{% endfor %}]
+}</script>
+<script id="statusChartData" type="application/json">{
+  "labels": [{% for s in by_status %}"{{ s.get_status_display|default:s.status }}"{% if not forloop.last %},{% endif %}{% endfor %}],
+  "values": [{% for s in by_status %}{{ s.n }}{% if not forloop.last %},{% endif %}{% endfor %}]
+}</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+  (function () {
+    const get = (id) => JSON.parse(document.getElementById(id).textContent);
+    const bar = get("barChartData");
+    window.__jcBar = { labels: bar.labels, values: bar.values, label: bar.label };
+    const monthly = get("monthlyChartData");
+    window.__jcMonthly = { labels: monthly.labels, series1: monthly.series1, series1Label: "Jobs" };
+    const status = get("statusChartData");
+    window.__jcStatus = { labels: status.labels, values: status.values };
+  })();
+</script>
+<script src="{% static 'js/charts.js' %}"></script>
+{% endblock %}

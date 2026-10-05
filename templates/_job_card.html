@@ -1,0 +1,44 @@
+{% comment %} Expects: job, optional saved_ids {% endcomment %}
+<div class="col-12 col-md-6 col-lg-4">
+  <div class="jc-card jc-card-hover job-card d-flex flex-column">
+    <div class="d-flex justify-content-between align-items-start mb-3">
+      <div class="d-flex align-items-center gap-3">
+        {% if job.company.logo %}
+          <img src="{{ job.company.logo.url }}" alt="{{ job.company.company_name }}" class="company-logo">
+        {% else %}
+          <span class="logo-fallback">{{ job.company.company_name|slice:":1" }}</span>
+        {% endif %}
+        <div class="min-w-0">
+          <h6 class="card-title mb-1 text-truncate">
+            <a href="{% url 'job_detail' job.pk %}" class="text-dark">{{ job.title }}</a>
+          </h6>
+          <div class="text-small text-muted text-truncate">{{ job.company.company_name }}</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="text-small text-muted mb-3 d-flex flex-wrap gap-2">
+      <span class="d-inline-flex align-items-center"><i class="bi bi-geo-alt me-1"></i> {{ job.location }}</span>
+      <span class="text-muted">•</span>
+      <span class="d-inline-flex align-items-center"><i class="bi bi-briefcase me-1"></i> {{ job.get_experience_display }}</span>
+      <span class="text-muted">•</span>
+      <span class="d-inline-flex align-items-center"><i class="bi bi-layers me-1"></i> {{ job.get_work_mode_display }}</span>
+    </div>
+    
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <span class="job-type-chip">{{ job.get_job_type_display }}</span>
+      <span class="text-small text-muted">{{ job.posted_display }}</span>
+    </div>
+
+    <div class="mt-auto d-flex justify-content-between align-items-center pt-3 border-top">
+      <span class="salary">{{ job.salary_display }}</span>
+      <div class="d-flex gap-2">
+        <button class="btn btn-outline-primary px-3 js-save-job" style="height: 38px; border-radius: 8px;" data-url="{% url 'toggle_save_job' job.pk %}" data-job-id="{{ job.pk }}"
+                data-login-url="{% url 'login' %}" title="Save job">
+          <i class="bi bi-bookmark{% if job.pk in saved_ids %}-fill{% endif %}"></i>
+        </button>
+        <a href="{% url 'job_detail' job.pk %}" class="btn btn-primary px-3" style="height: 38px; border-radius: 8px;">View Job</a>
+      </div>
+    </div>
+  </div>
+</div>

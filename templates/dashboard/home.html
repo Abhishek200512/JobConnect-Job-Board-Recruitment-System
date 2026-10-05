@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}JobConnect — Find Your Dream Job{% endblock %}
+
+{% block content %}
+<!-- ============ HERO ============ -->
+<section class="jc-hero">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-10 col-xl-8">
+        <span class="hero-badge"><i class="bi bi-shield-check me-2"></i> Trusted by job seekers and growing teams</span>
+        <h1 class="hero-heading">Find the right job.<br>Build your future.</h1>
+        <p class="hero-subtitle">Discover meaningful opportunities from companies hiring today.</p>
+        
+        <form action="{% url 'job_list' %}" method="get" class="jc-hero-search">
+          <div class="w-100 position-relative">
+            <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+            <input type="text" name="keyword" class="form-control ps-5 border-0 w-100" placeholder="Job title, skills or company" aria-label="Keyword">
+          </div>
+          <div class="search-divider"></div>
+          <div class="w-100 position-relative">
+            <i class="bi bi-geo-alt position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+            <input type="text" name="location" class="form-control ps-5 border-0 w-100" placeholder="Location" aria-label="Location">
+          </div>
+          <button class="btn btn-primary" type="submit">Search&nbsp;Jobs</button>
+        </form>
+        
+        <div class="mt-4 d-flex flex-wrap justify-content-center align-items-center">
+          <span class="text-small text-muted me-3">Popular:</span>
+          <a class="popular-keyword" href="{% url 'job_list' %}?keyword=python">Python</a>
+          <a class="popular-keyword" href="{% url 'job_list' %}?keyword=django">Django</a>
+          <a class="popular-keyword" href="{% url 'job_list' %}?work_mode=remote">Remote</a>
+          <a class="popular-keyword" href="{% url 'job_list' %}?job_type=internship">Internship</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ POPULAR CATEGORIES ============ -->
+<section class="section">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="section-heading">Explore opportunities by category</h2>
+      <p class="text-muted text-small">Find roles that match your skills and interests.</p>
+    </div>
+    <div class="row g-4 justify-content-center">
+      {% for category in categories %}
+        <div class="col-12 col-sm-6 col-lg-3">
+          <a href="{% url 'job_list' %}?category={{ category.slug }}" class="text-decoration-none">
+            <div class="jc-card jc-card-hover category-card">
+              <div class="icon">{% if category.icon %}{{ category.icon }}{% else %}<i class="bi bi-briefcase"></i>{% endif %}</div>
+              <div>
+                <h6 class="card-title mb-1">{{ category.name }}</h6>
+                <p class="text-small text-muted mb-0">{{ category.job_set.count|default:"0" }} jobs</p>
+              </div>
+            </div>
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ============ FEATURED JOBS ============ -->
+<section class="section section-alt">
+  <div class="container">
+    <div class="d-flex flex-wrap justify-content-between align-items-end mb-5">
+      <div>
+        <h2 class="section-heading mb-2">Featured Jobs</h2>
+        <p class="text-muted text-small mb-0">Handpicked opportunities from top companies</p>
+      </div>
+      <a href="{% url 'job_list' %}" class="btn btn-outline-primary mt-3 mt-md-0">View All Jobs</a>
+    </div>
+    <div class="row g-4">
+      {% for job in featured_jobs %}
+        {% include "_job_card.html" %}
+      {% empty %}
+        <div class="col-12 text-center text-muted py-5">
+          <i class="bi bi-inbox display-4 mb-3 d-block"></i>
+          <p>No jobs posted yet — check back soon!</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section class="section">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="section-heading">Built for people who are building their careers</h2>
+      <p class="text-muted text-small mx-auto" style="max-width: 600px;">JobConnect helps job seekers discover opportunities and helps recruiters find the right talent through a simple and transparent hiring workflow.</p>
+    </div>
+    <div class="row g-4 justify-content-center mt-4">
+      <div class="col-12 col-md-4">
+        <div class="step-card">
+          <div class="step-number">01</div>
+          <h5 class="card-title">Create your profile</h5>
+          <p class="text-small text-muted">Sign up, add your skills, education and resume — stand out to recruiters.</p>
+        </div>
+      </div>
+      <div class="col-12 col-md-4">
+        <div class="step-card">
+          <div class="step-number">02</div>
+          <h5 class="card-title">Discover relevant jobs</h5>
+          <p class="text-small text-muted">Search and filter jobs that match your skills and preferences.</p>
+        </div>
+      </div>
+      <div class="col-12 col-md-4">
+        <div class="step-card">
+          <div class="step-number">03</div>
+          <h5 class="card-title">Apply and track progress</h5>
+          <p class="text-small text-muted">Submit your application and track your status seamlessly.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

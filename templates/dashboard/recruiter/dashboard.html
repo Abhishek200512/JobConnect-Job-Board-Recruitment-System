@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Recruiter Dashboard — JobConnect{% endblock %}
+{% block content %}
+{% include "dashboard/_sidebar.html" with active="dashboard" %}
+
+<div class="d-flex justify-content-between align-items-center page-title">
+  <div>
+    <h1 class="h4 mb-1">Recruiter Dashboard</h1>
+    <p class="text-muted mb-0 small">Your hiring pipeline at a glance.</p>
+  </div>
+  <a href="{% url 'post_job' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Post New Job</a>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="jc-card stat-card h-100"><div class="stat-icon icon-indigo mb-2"><i class="bi bi-briefcase"></i></div>
+      <div class="stat-value">{{ counts.total_jobs }}</div><div class="stat-label">Total Jobs</div></div>
+  </div>
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="jc-card stat-card h-100"><div class="stat-icon icon-emerald mb-2"><i class="bi bi-check-circle"></i></div>
+      <div class="stat-value">{{ counts.active_jobs }}</div><div class="stat-label">Active Jobs</div></div>
+  </div>
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="jc-card stat-card h-100"><div class="stat-icon icon-teal mb-2"><i class="bi bi-people"></i></div>
+      <div class="stat-value">{{ counts.applicants }}</div><div class="stat-label">Applicants</div></div>
+  </div>
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="jc-card stat-card h-100"><div class="stat-icon icon-violet mb-2"><i class="bi bi-star"></i></div>
+      <div class="stat-value">{{ counts.shortlisted }}</div><div class="stat-label">Shortlisted</div></div>
+  </div>
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="jc-card stat-card h-100"><div class="stat-icon icon-rose mb-2"><i class="bi bi-calendar2-check"></i></div>
+      <div class="stat-value">{{ counts.interviews }}</div><div class="stat-label">Interviews</div></div>
+  </div>
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="jc-card stat-card h-100"><div class="stat-icon icon-amber mb-2"><i class="bi bi-trophy"></i></div>
+      <div class="stat-value">{{ counts.selected }}</div><div class="stat-label">Selected</div></div>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-lg-6">
+    <div class="jc-card chart-card h-100">
+      <h6><i class="bi bi-graph-up"></i> Applications per Month</h6>
+      <div class="chart-box"><canvas id="monthlyChart"></canvas></div>
+    </div>
+  </div>
+  <div class="col-lg-3">
+    <div class="jc-card chart-card h-100">
+      <h6><i class="bi bi-grid"></i> Jobs by Category</h6>
+      <div class="chart-box"><canvas id="barChart"></canvas></div>
+    </div>
+  </div>
+  <div class="col-lg-3">
+    <div class="jc-card chart-card h-100">
+      <h6><i class="bi bi-pie-chart"></i> Status Distribution</h6>
+      <div class="chart-box"><canvas id="statusChart"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<div class="jc-card p-3">
+  <div class="d-flex justify-content-between align-items-center px-2 py-2">
+    <h6 class="mb-0"><i class="bi bi-clock-history"></i> Recent Applications</h6>
+    <a href="{% url 'applicants' %}" class="small">View all</a>
+  </div>
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead><tr><th>Candidate</th><th>Job</th><th>Applied</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        {% for app in recent_applications %}
+          <tr>
+            <td>
+              <a href="{% url 'public_profile' app.applicant.pk %}" class="text-dark fw-semibold d-block">{{ app.applicant.display_name|truncatechars:24 }}</a>
+              <small class="text-muted">{{ app.applicant.email|truncatechars:28 }}</small>
+            </td>
+            <td class="small">{{ app.job.title|truncatechars:34 }}</td>
+            <td class="small text-muted">{{ app.applied_at|date:"d M" }}</td>
+            <td><span class="{{ app.badge_class }}">{{ app.get_status_display }}</span></td>
+            <td class="text-end"><a href="{% url 'applicants' %}?job={{ app.job.pk }}" class="btn btn-sm btn-light-brand">Review</a></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5"><div class="empty-state"><i class="bi bi-inbox"></i><p>No applications yet. Post a job to start receiving applications.</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% include "dashboard/_sidebar_end.html" %}
+{% endblock %}
+
+{% block extra_scripts %}
+{{ chart|json_script:"monthlyChartData" }}
+{{ chart|json_script:"barChartData" }}
+{{ chart|json_script:"statusChartData" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+  (function () {
+    const get = (id) => JSON.parse(document.getElementById(id).textContent);
+    const monthly = get("monthlyChartData");
+    window.__jcMonthly = { labels: monthly.months, series1: monthly.applications, series1Label: "Applications" };
+    const bar = get("barChartData");
+    window.__jcBar = { labels: bar.categories, values: bar.category_counts, label: "Jobs" };
+    const status = get("statusChartData");
+    window.__jcStatus = { labels: status.status_labels, values: status.status_counts };
+  })();
+</script>
+<script src="{% static 'js/charts.js' %}"></script>
+{% endblock %}

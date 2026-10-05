@@ -1,0 +1,42 @@
+{% comment %} Expects: active (sidebar key), role-derived links {% endcomment %}
+<button id="js-sidebar-toggle" class="btn btn-light-brand d-lg-none mb-3">
+  <i class="bi bi-list"></i> Menu
+</button>
+<div class="dash-wrapper">
+  <aside class="dash-sidebar" id="jcSidebar">
+    <div class="side-brand">Job<span class="brand-dot">Connect</span></div>
+    <ul class="nav flex-column">
+      {% if user.is_seeker %}
+        <li><a class="nav-link {% if active == 'dashboard' %}active{% endif %}" href="{% url 'seeker_dashboard' %}"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+        <li><a class="nav-link {% if active == 'profile' %}active{% endif %}" href="{% url 'profile' %}"><i class="bi bi-person"></i> My Profile</a></li>
+        <li><a class="nav-link {% if active == 'sections' %}active{% endif %}" href="{% url 'profile_sections' %}"><i class="bi bi-mortarboard"></i> Skills &amp; Education</a></li>
+        <li><a class="nav-link" href="{% url 'job_list' %}"><i class="bi bi-search"></i> Find Jobs</a></li>
+        <li><a class="nav-link {% if active == 'saved' %}active{% endif %}" href="{% url 'saved_jobs' %}"><i class="bi bi-bookmark"></i> Saved Jobs</a></li>
+        <li><a class="nav-link {% if active == 'applied' %}active{% endif %}" href="{% url 'applied_jobs' %}"><i class="bi bi-send"></i> Applied Jobs</a></li>
+        <li><a class="nav-link {% if active == 'notifications' %}active{% endif %}" href="{% url 'notifications' %}"><i class="bi bi-bell"></i> Notifications</a></li>
+        <li><a class="nav-link {% if active == 'settings' %}active{% endif %}" href="{% url 'seeker_settings' %}"><i class="bi bi-gear"></i> Settings</a></li>
+      {% elif user.is_recruiter %}
+        <li><a class="nav-link {% if active == 'dashboard' %}active{% endif %}" href="{% url 'recruiter_dashboard' %}"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+        <li><a class="nav-link {% if active == 'company' %}active{% endif %}" href="{% url 'company_profile' %}"><i class="bi bi-buildings"></i> Company Profile</a></li>
+        <li><a class="nav-link {% if active == 'post' %}active{% endif %}" href="{% url 'post_job' %}"><i class="bi bi-plus-square"></i> Post Job</a></li>
+        <li><a class="nav-link {% if active == 'jobs' %}active{% endif %}" href="{% url 'manage_jobs' %}"><i class="bi bi-briefcase"></i> Manage Jobs</a></li>
+        <li><a class="nav-link {% if active == 'applicants' %}active{% endif %}" href="{% url 'applicants' %}"><i class="bi bi-people"></i> Applicants</a></li>
+        <li><a class="nav-link {% if active == 'interviews' %}active{% endif %}" href="{% url 'applicants' %}?status=interview"><i class="bi bi-calendar2-check"></i> Interviews</a></li>
+        <li><a class="nav-link {% if active == 'notifications' %}active{% endif %}" href="{% url 'notifications' %}"><i class="bi bi-bell"></i> Notifications</a></li>
+        <li><a class="nav-link {% if active == 'settings' %}active{% endif %}" href="{% url 'seeker_settings' %}"><i class="bi bi-gear"></i> Settings</a></li>
+      {% else %}
+        <li><a class="nav-link {% if active == 'dashboard' %}active{% endif %}" href="{% url 'admin_dashboard' %}"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+        <li><a class="nav-link {% if active == 'users' %}active{% endif %}" href="{% url 'admin_users' %}"><i class="bi bi-people"></i> Users</a></li>
+        <li><a class="nav-link" href="{% url 'admin_users' %}?role=seeker"><i class="bi bi-person"></i> Job Seekers</a></li>
+        <li><a class="nav-link" href="{% url 'admin_users' %}?role=recruiter"><i class="bi bi-person-badge"></i> Recruiters</a></li>
+        <li><a class="nav-link {% if active == 'companies' %}active{% endif %}" href="{% url 'admin_companies' %}"><i class="bi bi-buildings"></i> Companies</a></li>
+        <li><a class="nav-link {% if active == 'jobs' %}active{% endif %}" href="{% url 'admin_jobs' %}"><i class="bi bi-briefcase"></i> Jobs</a></li>
+        <li><a class="nav-link {% if active == 'applications' %}active{% endif %}" href="{% url 'admin_applications' %}"><i class="bi bi-file-earmark-text"></i> Applications</a></li>
+        <li><a class="nav-link {% if active == 'reports' %}active{% endif %}" href="{% url 'admin_reports' %}"><i class="bi bi-graph-up"></i> Reports</a></li>
+        <li><a class="nav-link {% if active == 'settings' %}active{% endif %}" href="{% url 'seeker_settings' %}"><i class="bi bi-gear"></i> Settings</a></li>
+      {% endif %}
+      <li><hr class="border-secondary"></li>
+      <li><a class="nav-link text-danger" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+    </ul>
+  </aside>
+  <main class="dash-main flex-grow-1 min-w-0">

@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Skills &amp; Education — JobConnect{% endblock %}
+{% block content %}
+{% include "dashboard/_sidebar.html" with active="sections" %}
+
+<div class="page-title">
+  <h1 class="h4 mb-1">Skills, Education &amp; Experience</h1>
+  <p class="text-muted mb-0 small">These details power recruiter searches and job matches.</p>
+</div>
+
+<div class="row g-4">
+  <!-- Skills -->
+  <div class="col-12">
+    <div class="jc-card p-4">
+      <h5><i class="bi bi-lightning text-primary"></i> Skills</h5>
+      {% if profile.skills %}
+        <div class="d-flex flex-wrap gap-2 mb-3">
+          {% for s in profile.skills %}<span class="badge-soft-info">{{ s }}</span>{% endfor %}
+        </div>
+      {% else %}
+        <p class="text-muted small">No skills added yet.</p>
+      {% endif %}
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="section" value="skills">
+        <label class="form-label small">Add skills (comma separated)</label>
+        <div class="d-flex gap-2">
+          <input class="form-control" name="skills" value="{{ profile.skills|join:', ' }}" placeholder="Python, Django, SQL, Communication">
+          <button class="btn btn-primary">Update</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Education -->
+  <div class="col-lg-6">
+    <div class="jc-card p-4 h-100">
+      <h5><i class="bi bi-mortarboard text-primary"></i> Education</h5>
+      {% for e in profile.education %}
+        <div class="border-bottom pb-2 mb-2">
+          <strong class="small">{{ e.degree }}</strong>
+          <div class="small text-muted">{{ e.institution }}{% if e.year %} · {{ e.year }}{% endif %}</div>
+        </div>
+      {% empty %}<p class="text-muted small">No education added yet.</p>{% endfor %}
+      <form method="post" id="eduForm">
+        {% csrf_token %}
+        <input type="hidden" name="section" value="education">
+        <input type="hidden" name="education_json" id="educationJson" value='{{ profile.education|safe }}'>
+        <div class="row g-2">
+          <div class="col-12"><input class="form-control" id="eduDegree" placeholder="Degree, e.g. B.Tech CSE"></div>
+          <div class="col-7"><input class="form-control" id="eduInstitution" placeholder="Institution"></div>
+          <div class="col-5"><input class="form-control" id="eduYear" placeholder="Year, e.g. 2025"></div>
+          <div class="col-12"><button type="button" class="btn btn-light-brand w-100" onclick="addEducation()">+ Add Entry</button></div>
+        </div>
+        <button class="btn btn-primary w-100 mt-2">Save Education</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Experience -->
+  <div class="col-lg-6">
+    <div class="jc-card p-4 h-100">
+      <h5><i class="bi bi-briefcase text-primary"></i> Experience</h5>
+      {% for e in profile.experience %}
+        <div class="border-bottom pb-2 mb-2">
+          <strong class="small">{{ e.title }}</strong>
+          <div class="small text-muted">{{ e.company }}{% if e.duration %} · {{ e.duration }}{% endif %}</div>
+        </div>
+      {% empty %}<p class="text-muted small">No experience added yet.</p>{% endfor %}
+      <form method="post" id="expForm">
+        {% csrf_token %}
+        <input type="hidden" name="section" value="experience">
+        <input type="hidden" name="experience_json" id="experienceJson" value='{{ profile.experience|safe }}'>
+        <div class="row g-2">
+          <div class="col-12"><input class="form-control" id="expTitle" placeholder="Job title, e.g. Python Intern"></div>
+          <div class="col-7"><input class="form-control" id="expCompany" placeholder="Company"></div>
+          <div class="col-5"><input class="form-control" id="expDuration" placeholder="e.g. Jan 2025 – Jun 2025"></div>
+          <div class="col-12"><button type="button" class="btn btn-light-brand w-100" onclick="addExperience()">+ Add Entry</button></div>
+        </div>
+        <button class="btn btn-primary w-100 mt-2">Save Experience</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% include "dashboard/_sidebar_end.html" %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function loadJSON(id, fallback) {
+    try { return JSON.parse(document.getElementById(id).value || fallback); } catch (e) { return []; }
+  }
+  function addEducation() {
+    const degree = document.getElementById("eduDegree").value.trim();
+    const institution = document.getElementById("eduInstitution").value.trim();
+    const year = document.getElementById("eduYear").value.trim();
+    if (!degree || !institution) { alert("Degree and institution are required."); return; }
+    const list = loadJSON("educationJson", "[]");
+    list.push({ degree: degree, institution: institution, year: year });
+    document.getElementById("educationJson").value = JSON.stringify(list);
+    document.getElementById("eduForm").submit();
+  }
+  function addExperience() {
+    const title = document.getElementById("expTitle").value.trim();
+    const company = document.getElementById("expCompany").value.trim();
+    const duration = document.getElementById("expDuration").value.trim();
+    if (!title || !company) { alert("Title and company are required."); return; }
+    const list = loadJSON("experienceJson", "[]");
+    list.push({ title: title, company: company, duration: duration });
+    document.getElementById("experienceJson").value = JSON.stringify(list);
+    document.getElementById("expForm").submit();
+  }
+</script>
+{% endblock %}

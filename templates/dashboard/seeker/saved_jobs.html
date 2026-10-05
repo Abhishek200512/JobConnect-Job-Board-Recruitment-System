@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Saved Jobs — JobConnect{% endblock %}
+{% block content %}
+{% include "dashboard/_sidebar.html" with active="saved" %}
+
+<div class="page-title">
+  <h1 class="h4 mb-1">Saved Jobs</h1>
+  <p class="text-muted mb-0 small">Your bookmarked opportunities.</p>
+</div>
+
+<div class="row g-3">
+  {% for saved in saved_jobs %}
+    {% include "_job_card.html" with job=saved.job %}
+  {% empty %}
+    <div class="col-12"><div class="jc-card empty-state">
+      <i class="bi bi-bookmark-x"></i>
+      <h5 class="text-dark">No saved jobs yet</h5>
+      <p>Tap the bookmark icon on any job to save it here.</p>
+      <a href="{% url 'job_list' %}" class="btn btn-primary">Browse Jobs</a>
+    </div></div>
+  {% endfor %}
+</div>
+
+{% include "dashboard/_sidebar_end.html" %}
+{% endblock %}

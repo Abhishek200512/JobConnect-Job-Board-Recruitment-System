@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Manage Companies — JobConnect{% endblock %}
+{% block content %}
+{% include "dashboard/_sidebar.html" with active="companies" %}
+
+<div class="page-title d-flex justify-content-between align-items-center flex-wrap gap-2">
+  <div>
+    <h1 class="h4 mb-1">Manage Companies</h1>
+    <p class="text-muted mb-0 small">{{ companies.count }} registered compan{{ companies.count|pluralize:"y,ies" }}</p>
+  </div>
+  <form method="get" class="d-flex gap-2">
+    <input type="text" name="q" class="form-control form-control-sm" placeholder="Search companies…" value="{{ current_q }}">
+    <button class="btn btn-sm btn-light-brand">Search</button>
+  </form>
+</div>
+
+<div class="jc-table card">
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead><tr><th>Company</th><th>Recruiter</th><th>Industry</th><th>Location</th><th>Jobs</th><th class="text-end">Actions</th></tr></thead>
+      <tbody>
+        {% for company in companies %}
+          <tr>
+            <td>
+              <div class="d-flex gap-2 align-items-center">
+                {% if company.logo %}<img src="{{ company.logo.url }}" class="avatar-sm rounded" alt="">{% else %}<span class="logo-fallback" style="width:36px;height:36px;font-size:.85rem;">{{ company.company_name|slice:":1" }}</span>{% endif %}
+                <a href="{% url 'company_detail' company.pk %}" class="text-dark fw-semibold">{{ company.company_name|truncatechars:26 }}</a>
+              </div>
+            </td>
+            <td class="small">{{ company.recruiter.email|truncatechars:26 }}</td>
+            <td class="small">{{ company.industry|default:"—" }}</td>
+            <td class="small">{{ company.location|default:"—" }}</td>
+            <td><span class="badge-soft-info">{{ company.jobs.count }}</span></td>
+            <td class="text-end">
+              <button class="btn btn-sm btn-outline-danger js-confirm-action" data-url="{% url 'admin_delete_company' company.pk %}"
+                      data-confirm="Delete “{{ company.company_name }}” and all its jobs?">
+                <i class="bi bi-trash"></i> Delete
+              </button>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6"><div class="empty-state"><i class="bi bi-buildings"></i><p>No companies found.</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% include "dashboard/_sidebar_end.html" %}
+{% endblock %}

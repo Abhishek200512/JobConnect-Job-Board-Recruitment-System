@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Manage Users — JobConnect{% endblock %}
+{% block content %}
+{% include "dashboard/_sidebar.html" with active="users" %}
+
+<div class="page-title d-flex justify-content-between align-items-center flex-wrap gap-2">
+  <div>
+    <h1 class="h4 mb-1">Manage Users</h1>
+    <p class="text-muted mb-0 small">{{ users.count }} account{{ users.count|pluralize }}</p>
+  </div>
+  <form method="get" class="row g-2 align-items-center">
+    <div class="col-auto">
+      <select name="role" class="form-select form-select-sm" onchange="this.form.submit()">
+        <option value="">All roles</option>
+        {% for value, label in roles %}
+          <option value="{{ value }}" {% if current_role == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-auto"><input type="text" name="q" class="form-control form-control-sm" placeholder="Search name / email…" value="{{ current_q }}"></div>
+    <div class="col-auto"><button class="btn btn-sm btn-light-brand">Filter</button></div>
+  </form>
+</div>
+
+<div class="jc-table card">
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead><tr><th>User</th><th>Role</th><th>Verified</th><th>Status</th><th>Joined</th><th class="text-end">Actions</th></tr></thead>
+      <tbody>
+        {% for u in users %}
+          <tr>
+            <td>
+              <span class="text-dark fw-semibold d-block">{{ u.display_name|truncatechars:24 }}</span>
+              <small class="text-muted">{{ u.email }}</small>
+            </td>
+            <td><span class="badge-soft-secondary">{{ u.get_role_display }}</span></td>
+            <td>{% if u.is_verified %}<span class="badge-soft-success">Yes</span>{% else %}<span class="badge-soft-warning">No</span>{% endif %}</td>
+            <td>{% if u.is_active %}<span class="badge-soft-success">Active</span>{% else %}<span class="badge-soft-danger">Deactivated</span>{% endif %}</td>
+            <td class="small text-muted">{{ u.created_at|date:"d M Y" }}</td>
+            <td class="text-end">
+              {% if not u.is_superuser %}
+                <button class="btn btn-sm {% if u.is_active %}btn-outline-danger{% else %}btn-light-brand{% endif %} js-confirm-action"
+                        data-url="{% url 'admin_toggle_user' u.pk %}"
+                        data-confirm="{% if u.is_active %}Deactivate {{ u.email }}?{% else %}Activate {{ u.email }}?{% endif %}">
+                  {% if u.is_active %}<i class="bi bi-slash-circle"></i> Deactivate{% else %}<i class="bi bi-check-circle"></i> Activate{% endif %}
+                </button>
+              {% else %}
+                <span class="badge-soft-info">Superuser</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6"><div class="empty-state"><i class="bi bi-people"></i><p>No users match your filters.</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% include "dashboard/_sidebar_end.html" %}
+{% endblock %}

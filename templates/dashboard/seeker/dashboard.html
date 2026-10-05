@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Seeker Dashboard — JobConnect{% endblock %}
+{% block content %}
+{% include "dashboard/_sidebar.html" with active="dashboard" %}
+
+<div class="d-flex justify-content-between align-items-center page-title">
+  <div>
+    <h1 class="h4 mb-1">Welcome back, {{ user.display_name }} 👋</h1>
+    <p class="text-muted mb-0 small">Here's your application activity at a glance.</p>
+  </div>
+  <a href="{% url 'job_list' %}" class="btn btn-primary"><i class="bi bi-search"></i> Find Jobs</a>
+</div>
+
+<div class="row g-3 mb-4">
+  {% with colors="icon-indigo,icon-teal,icon-amber,icon-violet,icon-rose,icon-emerald" %}
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="jc-card stat-card h-100"><div class="stat-icon icon-indigo mb-2"><i class="bi bi-send"></i></div>
+      <div class="stat-value">{{ counts.applied }}</div><div class="stat-label">Applied Jobs</div></div>
+  </div>
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="jc-card stat-card h-100"><div class="stat-icon icon-teal mb-2"><i class="bi bi-bookmark"></i></div>
+      <div class="stat-value">{{ counts.saved }}</div><div class="stat-label">Saved Jobs</div></div>
+  </div>
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="jc-card stat-card h-100"><div class="stat-icon icon-amber mb-2"><i class="bi bi-eye"></i></div>
+      <div class="stat-value">{{ counts.under_review }}</div><div class="stat-label">Under Review</div></div>
+  </div>
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="jc-card stat-card h-100"><div class="stat-icon icon-violet mb-2"><i class="bi bi-star"></i></div>
+      <div class="stat-value">{{ counts.shortlisted }}</div><div class="stat-label">Shortlisted</div></div>
+  </div>
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="jc-card stat-card h-100"><div class="stat-icon icon-rose mb-2"><i class="bi bi-calendar2-check"></i></div>
+      <div class="stat-value">{{ counts.interviews }}</div><div class="stat-label">Interviews</div></div>
+  </div>
+  <div class="col-6 col-md-4 col-xl-2">
+    <div class="jc-card stat-card h-100"><div class="stat-icon icon-emerald mb-2"><i class="bi bi-trophy"></i></div>
+      <div class="stat-value">{{ counts.selected }}</div><div class="stat-label">Selected</div></div>
+  </div>
+  {% endwith %}
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-lg-8">
+    <div class="jc-card chart-card h-100">
+      <h6><i class="bi bi-graph-up"></i> Application Activity</h6>
+      <div class="chart-box">
+        <canvas id="activityChart"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="jc-card p-3 h-100">
+      <h6 class="px-2 pt-2"><i class="bi bi-lightning"></i> Recommended Jobs</h6>
+      {% for job in recommended_jobs %}
+        <a href="{% url 'job_detail' job.pk %}" class="d-block p-2 rounded text-decoration-none job-reco">
+          <strong class="text-dark small">{{ job.title|truncatechars:34 }}</strong>
+          <div class="small text-muted">{{ job.company.company_name }} · {{ job.location }}</div>
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<div class="jc-card p-3">
+  <div class="d-flex justify-content-between align-items-center px-2 py-2">
+    <h6 class="mb-0"><i class="bi bi-clock-history"></i> Recent Applications</h6>
+    <a href="{% url 'applied_jobs' %}" class="small">View all</a>
+  </div>
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead><tr><th>Job</th><th>Company</th><th>Date</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for app in recent_applications %}
+          <tr>
+            <td><a href="{% url 'job_detail' app.job.pk %}" class="text-dark fw-semibold">{{ app.job.title|truncatechars:38 }}</a></td>
+            <td class="small">{{ app.job.company.company_name }}</td>
+            <td class="small text-muted">{{ app.applied_at|date:"d M Y" }}</td>
+            <td><span class="{{ app.badge_class|default:'badge-soft-secondary' }}">{{ app.get_status_display }}</span></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4"><div class="empty-state"><i class="bi bi-inbox"></i><p>No applications yet. <a href="{% url 'job_list' %}">Find your first job</a></p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% include "dashboard/_sidebar_end.html" %}
+{% endblock %}
+
+{% block extra_scripts %}
+{{ chart|json_script:"activityChartData" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+  (function () {
+    const data = JSON.parse(document.getElementById("activityChartData").textContent);
+    window.__jcLine = { labels: data.labels, series1: data.applied, series1Label: "Applications",
+                        series2: data.selected, series2Label: "Selected" };
+  })();
+</script>
+<script src="{% static 'js/charts.js' %}"></script>
+{% endblock %}

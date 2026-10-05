@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}{{ job.title }} at {{ job.company.company_name }} — JobConnect{% endblock %}
+
+{% block content %}
+<section class="py-4">
+  <div class="container">
+    <nav aria-label="breadcrumb" class="mb-3">
+      <ol class="breadcrumb small">
+        <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'job_list' %}">Jobs</a></li>
+        <li class="breadcrumb-item active">{{ job.title|truncatechars:40 }}</li>
+      </ol>
+    </nav>
+
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <div class="jc-card p-4 mb-4">
+          <div class="d-flex gap-3 align-items-start flex-wrap">
+            {% if job.company.logo %}
+              <img src="{{ job.company.logo.url }}" class="company-logo" style="width:64px;height:64px;" alt="{{ job.company.company_name }}">
+            {% else %}
+              <span class="logo-fallback" style="width:64px;height:64px;font-size:1.5rem;">{{ job.company.company_name|slice:":1" }}</span>
+            {% endif %}
+            <div class="flex-grow-1">
+              <h1 class="h4 mb-1">{{ job.title }}</h1>
+              <p class="text-muted mb-2">
+                <a href="{% url 'company_detail' job.company.pk %}">{{ job.company.company_name }}</a>
+                · <i class="bi bi-geo-alt"></i> {{ job.location }}
+              </p>
+              <div class="d-flex flex-wrap gap-2">
+                <span class="badge-soft-info">{{ job.get_job_type_display }}</span>
+                <span class="badge-soft-warning">{{ job.get_work_mode_display }}</span>
+                <span class="badge-soft-purple">{{ job.get_experience_display }}</span>
+                <span class="badge-soft-secondary">{{ job.category.name }}</span>
+                <span class="badge-soft-success"><i class="bi bi-people"></i> {{ job.openings }} opening{{ job.openings|pluralize }}</span>
+              </div>
+            </div>
+            <div class="text-end">
+              <div class="salary fs-5">{{ job.salary_display }}</div>
+              <small class="text-muted">Posted {{ job.posted_display }}</small>
+            </div>
+          </div>
+
+          <hr>
+          <div class="d-flex flex-wrap gap-2">
+            {% if user.is_authenticated and user.is_seeker %}
+              {% if has_applied %}
+                <button class="btn btn-success" disabled><i class="bi bi-check-circle"></i> Applied</button>
+              {% else %}
+                <a href="{% url 'apply_job' job.pk %}" class="btn btn-primary px-4"><i class="bi bi-send"></i> Apply Now</a>
+              {% endif %}
+              <button class="btn btn-light-brand js-save-job" data-url="{% url 'toggle_save_job' job.pk %}" data-job-id="{{ job.pk }}" data-login-url="{% url 'login' %}">
+                <i class="bi bi-bookmark{% if has_saved %}-fill{% endif %}"></i> <span>{% if has_saved %}Saved{% else %}Save Job{% endif %}</span>
+              </button>
+            {% elif user.is_authenticated and user.is_recruiter %}
+              <a href="{% url 'job_applicants' job.pk %}" class="btn btn-primary"><i class="bi bi-people"></i> View Applicants</a>
+            {% else %}
+              <a href="{% url 'login' %}?next={% url 'job_detail' job.pk %}" class="btn btn-primary px-4"><i class="bi bi-box-arrow-in-right"></i> Login to Apply</a>
+            {% endif %}
+            <span class="ms-auto text-muted small align-self-center"><i class="bi bi-eye"></i> {{ job.views_count }} views</span>
+          </div>
+        </div>
+
+        <div class="jc-card p-4 mb-4">
+          <h5 class="mb-3">Job Description</h5>
+          <p style="white-space:pre-line;">{{ job.description }}</p>
+
+          {% if job.responsibilities %}
+            <h5 class="mt-4 mb-3">Responsibilities</h5>
+            <ul>{% for line in job.responsibilities_list %}<li>{{ line }}</li>{% endfor %}</ul>
+          {% endif %}
+
+          {% if job.qualifications %}
+            <h5 class="mt-4 mb-3">Qualifications</h5>
+            <ul>{% for line in job.qualifications_list %}<li>{{ line }}</li>{% endfor %}</ul>
+          {% endif %}
+
+          {% if job.benefits %}
+            <h5 class="mt-4 mb-3">Benefits</h5>
+            <ul>{% for line in job.benefits_list %}<li>{{ line }}</li>{% endfor %}</ul>
+          {% endif %}
+
+          {% if job.skills %}
+            <h5 class="mt-4 mb-3">Required Skills</h5>
+            <div class="d-flex flex-wrap gap-2">
+              {% for s in job.skills %}<span class="badge-soft-info">{{ s }}</span>{% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="jc-card p-4 mb-4">
+          <h6 class="mb-3">Job Overview</h6>
+          <table class="table table-sm small">
+            <tr><td class="text-muted">Job Type</td><td class="text-end fw-semibold">{{ job.get_job_type_display }}</td></tr>
+            <tr><td class="text-muted">Work Mode</td><td class="text-end fw-semibold">{{ job.get_work_mode_display }}</td></tr>
+            <tr><td class="text-muted">Experience</td><td class="text-end fw-semibold">{{ job.get_experience_display }}</td></tr>
+            <tr><td class="text-muted">Salary</td><td class="text-end fw-semibold">{{ job.salary_display }}</td></tr>
+            <tr><td class="text-muted">Openings</td><td class="text-end fw-semibold">{{ job.openings }}</td></tr>
+            <tr><td class="text-muted">Posted</td><td class="text-end fw-semibold">{{ job.posted_display }}</td></tr>
+          </table>
+        </div>
+
+        <div class="jc-card p-4">
+          <h6 class="mb-3">About the Company</h6>
+          {% if job.company.logo %}
+            <img src="{{ job.company.logo.url }}" class="company-logo mb-2" alt="">
+          {% else %}
+            <span class="logo-fallback mb-2">{{ job.company.company_name|slice:":1" }}</span>
+          {% endif %}
+          <h6>{{ job.company.company_name }}</h6>
+          <p class="small text-muted">{{ job.company.description|truncatechars:180|default:"No description available." }}</p>
+          {% if job.company.website %}<a href="{{ job.company.website }}" target="_blank" rel="noopener" class="small"><i class="bi bi-globe"></i> {{ job.company.website }}</a>{% endif %}
+          <hr>
+          <a href="{% url 'company_detail' job.company.pk %}" class="btn btn-light-brand btn-sm w-100">View Company Profile</a>
+        </div>
+      </div>
+    </div>
+
+    {% if similar_jobs %}
+      <h5 class="mt-5 mb-3">Similar Jobs</h5>
+      <div class="row g-3">
+        {% for job in similar_jobs %}
+          {% include "_job_card.html" %}
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

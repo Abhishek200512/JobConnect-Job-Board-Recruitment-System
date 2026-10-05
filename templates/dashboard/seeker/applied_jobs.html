@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Applied Jobs — JobConnect{% endblock %}
+{% block content %}
+{% include "dashboard/_sidebar.html" with active="applied" %}
+
+<div class="page-title d-flex justify-content-between align-items-center">
+  <div>
+    <h1 class="h4 mb-1">Applied Jobs</h1>
+    <p class="text-muted mb-0 small">Track the status of every application.</p>
+  </div>
+  <form method="get" class="d-flex gap-2">
+    <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+      <option value="">All statuses</option>
+      {% for value, label in statuses %}
+        <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </form>
+</div>
+
+<div class="row g-3">
+  {% for app in applications %}
+    <div class="col-12">
+      <div class="jc-card p-3 p-md-4">
+        <div class="row g-3 align-items-center">
+          <div class="col-md-4">
+            <div class="d-flex gap-3 align-items-center">
+              {% if app.job.company.logo %}
+                <img src="{{ app.job.company.logo.url }}" class="company-logo" alt="">
+              {% else %}
+                <span class="logo-fallback">{{ app.job.company.company_name|slice:":1" }}</span>
+              {% endif %}
+              <div>
+                <a href="{% url 'job_detail' app.job.pk %}" class="text-dark fw-semibold d-block">{{ app.job.title|truncatechars:40 }}</a>
+                <span class="small text-muted">{{ app.job.company.company_name }} · {{ app.job.location }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="status-timeline">
+              {% for step in app.timeline %}
+                <div class="tl-step {% if step.done %}done{% endif %}">
+                  <div class="tl-dot"></div>{{ step.label }}
+                </div>
+              {% endfor %}
+            </div>
+            {% if app.status == 'rejected' %}
+              <span class="badge-soft-danger mt-2 d-inline-block">Not selected</span>
+            {% endif %}
+          </div>
+          <div class="col-md-2">
+            <span class="{{ app.badge_class }}">{{ app.get_status_display }}</span>
+            {% if app.recruiter_note %}<div class="small text-muted mt-1" title="{{ app.recruiter_note }}"><i class="bi bi-chat-left-text"></i> Recruiter note</div>{% endif %}
+          </div>
+          <div class="col-md-2 text-muted small">
+            Applied {{ app.applied_at|date:"d M Y" }}
+          </div>
+          <div class="col-md-1 text-end">
+            {% if app.status == 'applied' or app.status == 'under_review' %}
+              <button class="btn btn-sm btn-outline-danger js-confirm-action" data-url="{% url 'withdraw_application' app.pk %}"
+                      data-confirm="Withdraw this application?"><i class="bi bi-x-lg"></i></button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  {% empty %}
+    <div class="col-12"><div class="jc-card empty-state">
+      <i class="bi bi-send-x"></i>
+      <h5 class="text-dark">No applications {% if current_status %}with this status {% endif %}yet</h5>
+      <p><a href="{% url 'job_list' %}">Browse jobs</a> and apply to get started.</p>
+    </div></div>
+  {% endfor %}
+</div>
+
+{% include "dashboard/_sidebar_end.html" %}
+{% endblock %}

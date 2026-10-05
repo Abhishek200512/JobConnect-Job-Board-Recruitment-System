@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}{% if is_500 %}Server Error{% else %}Page Not Found{% endif %} — JobConnect{% endblock %}
+{% block content %}
+<section class="py-5 text-center">
+  <div class="container py-5">
+    <h1 class="display-1 fw-bold text-primary">{% if is_500 %}500{% else %}404{% endif %}</h1>
+    <h4 class="mb-3">{% if is_500 %}Something went wrong on our side.{% else %}This page could not be found.{% endif %}</h4>
+    <p class="text-muted mb-4">The link may be broken or the page may have been removed.</p>
+    <a href="{% url 'home' %}" class="btn btn-primary px-4"><i class="bi bi-house"></i> Back to Home</a>
+  </div>
+</section>
+{% endblock %}

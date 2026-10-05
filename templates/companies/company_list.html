@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Companies — JobConnect{% endblock %}
+{% block content %}
+<section class="py-4 bg-white border-bottom">
+  <div class="container">
+    <h1 class="h3 mb-1">Explore Companies</h1>
+    <p class="text-muted mb-0">{{ total }} companies hiring on JobConnect</p>
+  </div>
+</section>
+
+<section class="py-4">
+  <div class="container">
+    <form method="get" class="jc-card p-3 mb-4">
+      <div class="row g-2 align-items-end">
+        <div class="col-md">
+          <label class="form-label small mb-1">Search</label>
+          <input type="text" name="q" class="form-control" placeholder="Company name, industry or location" value="{{ current_q }}">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label small mb-1">Industry</label>
+          <select name="industry" class="form-select">
+            <option value="">All Industries</option>
+            {% for ind in industries %}
+              <option value="{{ ind }}" {% if current_industry == ind %}selected{% endif %}>{{ ind }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-auto">
+          <button class="btn btn-primary w-100"><i class="bi bi-search"></i> Search</button>
+        </div>
+      </div>
+    </form>
+
+    <div class="row g-3">
+      {% for company in companies %}
+        <div class="col-md-6 col-lg-4">
+          <a href="{% url 'company_detail' company.pk %}" class="text-decoration-none">
+            <div class="jc-card jc-card-hover p-4 h-100">
+              <div class="d-flex align-items-center gap-3 mb-3">
+                {% if company.logo %}
+                  <img src="{{ company.logo.url }}" class="company-logo" alt="{{ company.company_name }}">
+                {% else %}
+                  <span class="logo-fallback">{{ company.company_name|slice:":1" }}</span>
+                {% endif %}
+                <div>
+                  <h6 class="text-dark mb-0">{{ company.company_name }}</h6>
+                  <small class="text-muted"><i class="bi bi-geo-alt"></i> {{ company.location|default:"—" }}</small>
+                </div>
+              </div>
+              <p class="small text-muted mb-3">{{ company.description|truncatechars:110|default:"View open roles at this company." }}</p>
+              <div class="d-flex justify-content-between align-items-center">
+                {% if company.industry %}<span class="badge-soft-secondary">{{ company.industry }}</span>{% endif %}
+                <span class="badge-soft-success">{{ company.open_jobs }} open job{{ company.open_jobs|pluralize }}</span>
+              </div>
+            </div>
+          </a>
+        </div>
+      {% empty %}
+        <div class="empty-state"><i class="bi bi-buildings"></i><h5 class="text-dark">No companies found</h5><p>Try a different search.</p></div>
+      {% endfor %}
+    </div>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+      <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+          {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?{{ page_obj.paginator.GET_param_name|default:'page' }}={{ page_obj.previous_page_number }}{% if current_q %}&q={{ current_q }}{% endif %}">«</a></li>
+          {% endif %}
+          {% for num in page_obj.paginator.page_range %}
+            {% if num == page_obj.number %}
+              <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% elif num <= page_obj.number|add:2 and num >= page_obj.number|add:-2 %}
+              <li class="page-item"><a class="page-link" href="?page={{ num }}{% if current_q %}&q={{ current_q }}{% endif %}{% if current_industry %}&industry={{ current_industry }}{% endif %}">{{ num }}</a></li>
+            {% endif %}
+          {% endfor %}
+          {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if current_q %}&q={{ current_q }}{% endif %}">»</a></li>
+          {% endif %}
+        </ul>
+      </nav>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

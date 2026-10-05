@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Company Profile — JobConnect{% endblock %}
+{% block content %}
+{% include "dashboard/_sidebar.html" with active="company" %}
+
+<div class="page-title">
+  <h1 class="h4 mb-1">Company Profile</h1>
+  <p class="text-muted mb-0 small">This information is shown to candidates on your jobs.</p>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="jc-card p-4 text-center">
+      {% if company and company.logo %}
+        <img src="{{ company.logo.url }}" class="rounded mb-3" style="width:110px;height:110px;object-fit:cover;" alt="">
+      {% else %}
+        <span class="logo-fallback mx-auto mb-3" style="width:110px;height:110px;font-size:2.2rem;">{{ company.company_name|default:'C'|slice:":1" }}</span>
+      {% endif %}
+      <h5 class="mb-1">{{ company.company_name|default:"No company yet" }}</h5>
+      <p class="text-muted small mb-0">{{ company.industry|default:"Complete the form to publish your company." }}</p>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="jc-card p-4">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row">
+          <div class="col-md-6 mb-3"><label class="form-label">Company Name *</label>
+            <input class="form-control" name="company_name" value="{{ company.company_name|default:'' }}" required></div>
+          <div class="col-md-6 mb-3"><label class="form-label">Industry</label>
+            <input class="form-control" name="industry" placeholder="e.g. Information Technology" value="{{ company.industry|default:'' }}"></div>
+          <div class="col-md-6 mb-3"><label class="form-label">Website</label>
+            <input type="url" class="form-control" name="website" placeholder="https://…" value="{{ company.website|default:'' }}"></div>
+          <div class="col-md-6 mb-3"><label class="form-label">Location</label>
+            <input class="form-control" name="location" placeholder="City, State" value="{{ company.location|default:'' }}"></div>
+          <div class="col-md-6 mb-3"><label class="form-label">Company Size</label>
+            <select class="form-select" name="size">
+              {% for s in "1-10,11-50,50-200,200-500,500-1000,1000+"|make_list %}{% endfor %}
+              <option value="" {% if not company.size %}selected{% endif %}>Select size</option>
+              <option value="1-10" {% if company.size == '1-10' %}selected{% endif %}>1-10 employees</option>
+              <option value="11-50" {% if company.size == '11-50' %}selected{% endif %}>11-50 employees</option>
+              <option value="50-200" {% if company.size == '50-200' %}selected{% endif %}>50-200 employees</option>
+              <option value="200-500" {% if company.size == '200-500' %}selected{% endif %}>200-500 employees</option>
+              <option value="500-1000" {% if company.size == '500-1000' %}selected{% endif %}>500-1000 employees</option>
+              <option value="1000+" {% if company.size == '1000+' %}selected{% endif %}>1000+ employees</option>
+            </select></div>
+          <div class="col-md-6 mb-3"><label class="form-label">Company Logo <span class="text-muted small">(max 3 MB)</span></label>
+            <input type="file" class="form-control" name="logo" accept="image/*"></div>
+        </div>
+        <div class="mb-3"><label class="form-label">Description</label>
+          <textarea class="form-control" name="description" rows="5" placeholder="What does your company do? Culture? Mission?">{{ company.description|default:'' }}</textarea></div>
+        <button class="btn btn-primary px-4"><i class="bi bi-check2"></i> Save Company Profile</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% include "dashboard/_sidebar_end.html" %}
+{% endblock %}

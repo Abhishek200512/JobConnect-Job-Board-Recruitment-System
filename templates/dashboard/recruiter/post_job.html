@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}{% if edit %}Edit Job{% else %}Post a Job{% endif %} — JobConnect{% endblock %}
+{% block content %}
+{% include "dashboard/_sidebar.html" with active="post" %}
+
+<div class="page-title">
+  <h1 class="h4 mb-1">{% if edit %}Edit Job — {{ job.title }}{% else %}Post a New Job{% endif %}</h1>
+  <p class="text-muted mb-0 small">Posting as <strong>{{ company.company_name }}</strong></p>
+</div>
+
+<div class="jc-card p-4">
+  {% if form.non_field_errors %}
+    <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+  {% endif %}
+  <form method="post" novalidate>
+    {% csrf_token %}
+    <div class="row">
+      <div class="col-md-8 mb-3">
+        <label class="form-label">Job Title *</label>
+        <input class="form-control {% if form.title.errors %}is-invalid{% endif %}" name="title"
+               value="{{ form.title.value|default:'' }}" required>
+        {% for e in form.title.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Category *</label>
+        <select class="form-select {% if form.category.errors %}is-invalid{% endif %}" name="category" required>
+          {% for cat in form.category.field.queryset %}
+            <option value="{{ cat.pk }}" {% if form.category.value|stringformat:'s' == cat.pk|stringformat:'s' %}selected{% endif %}>{{ cat.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Location *</label>
+        <input class="form-control" name="location" value="{{ form.location.value|default:'' }}" placeholder="City, State" required>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Job Type *</label>
+        <select class="form-select" name="job_type">
+          {% for value, label in form.job_type.field.choices %}
+            <option value="{{ value }}" {% if form.job_type.value == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Work Mode *</label>
+        <select class="form-select" name="work_mode">
+          {% for value, label in form.work_mode.field.choices %}
+            <option value="{{ value }}" {% if form.work_mode.value == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Experience Level</label>
+        <select class="form-select" name="experience">
+          {% for value, label in form.experience.field.choices %}
+            <option value="{{ value }}" {% if form.experience.value == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2 mb-3">
+        <label class="form-label">Salary Min (₹/yr)</label>
+        <input type="number" class="form-control" name="salary_min" value="{{ form.salary_min.value|default:'' }}" min="0">
+      </div>
+      <div class="col-md-2 mb-3">
+        <label class="form-label">Salary Max (₹/yr)</label>
+        <input type="number" class="form-control" name="salary_max" value="{{ form.salary_max.value|default:'' }}" min="0">
+      </div>
+      <div class="col-md-2 mb-3">
+        <label class="form-label">Openings *</label>
+        <input type="number" class="form-control" name="openings" value="{{ form.openings.value|default:1 }}" min="1" required>
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Skills <span class="text-muted small">(comma separated)</span></label>
+        <input class="form-control" name="skills" value="{{ form.skills.value|default:'' }}" placeholder="Python, Django, SQL">
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Job Description *</label>
+      <textarea class="form-control" name="description" rows="5" required>{{ form.description.value|default:'' }}</textarea>
+    </div>
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Responsibilities <span class="text-muted small">(one per line)</span></label>
+        <textarea class="form-control" name="responsibilities" rows="4">{{ form.responsibilities.value|default:'' }}</textarea>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Qualifications <span class="text-muted small">(one per line)</span></label>
+        <textarea class="form-control" name="qualifications" rows="4">{{ form.qualifications.value|default:'' }}</textarea>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Benefits <span class="text-muted small">(one per line)</span></label>
+        <textarea class="form-control" name="benefits" rows="4">{{ form.benefits.value|default:'' }}</textarea>
+      </div>
+    </div>
+    <button class="btn btn-primary px-4"><i class="bi bi-check2"></i> {% if edit %}Update Job{% else %}Publish Job{% endif %}</button>
+    <a href="{% url 'manage_jobs' %}" class="btn btn-outline-secondary">Cancel</a>
+  </form>
+</div>
+
+{% include "dashboard/_sidebar_end.html" %}
+{% endblock %}

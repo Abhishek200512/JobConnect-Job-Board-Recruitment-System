@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Browse Jobs — JobConnect{% endblock %}
+
+{% block content %}
+<section class="py-4 bg-white border-bottom">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h1 class="h3 mb-1" style="font-weight: 800;">Find Your Next Role</h1>
+        <p class="text-muted mb-0">
+          <span id="resultsCount">{{ total_results }} job{{ total_results|pluralize }} found</span>
+          {% if current_filters.keyword %} for “{{ current_filters.keyword }}”{% endif %}
+        </p>
+      </div>
+      <button class="btn btn-outline-primary d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
+        <i class="bi bi-funnel me-1"></i> Filters
+      </button>
+    </div>
+  </div>
+</section>
+
+<section class="py-4">
+  <div class="container">
+    <div class="row g-4">
+      <!-- ============ FILTER SIDEBAR ============ -->
+      <div class="col-lg-3">
+        <div class="collapse d-lg-block" id="filterCollapse">
+          <form id="jobFilterForm" class="jc-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h6 class="mb-0 card-title"><i class="bi bi-funnel"></i> Filters</h6>
+              <button type="button" id="jsResetFilters" class="btn btn-sm text-muted text-decoration-none p-0 fw-semibold">Reset</button>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Keyword</label>
+              <input type="text" name="keyword" class="form-control" placeholder="Job title, skill" value="{{ current_filters.keyword|default:'' }}">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Location</label>
+              <input type="text" name="location" class="form-control" placeholder="City or 'Remote'" value="{{ current_filters.location|default:'' }}">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Category</label>
+              <select name="category" class="form-select">
+                <option value="">All Categories</option>
+                {% for c in categories %}
+                  <option value="{{ c.slug }}" {% if current_filters.category == c.slug %}selected{% endif %}>{{ c.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Job Type</label>
+              <select name="job_type" class="form-select">
+                <option value="">All Types</option>
+                {% for value, label in job_types %}
+                  <option value="{{ value }}" {% if current_filters.job_type == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Work Mode</label>
+              <select name="work_mode" class="form-select">
+                <option value="">All Modes</option>
+                {% for value, label in work_modes %}
+                  <option value="{{ value }}" {% if current_filters.work_mode == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Experience</label>
+              <select name="experience" class="form-select">
+                <option value="">Any Experience</option>
+                {% for value, label in experiences %}
+                  <option value="{{ value }}" {% if current_filters.experience == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Salary Range (₹/year)</label>
+              <div class="d-flex gap-2">
+                <input type="number" name="min_salary" class="form-control" placeholder="Min" value="{{ current_filters.min_salary|default:'' }}">
+                <input type="number" name="max_salary" class="form-control" placeholder="Max" value="{{ current_filters.max_salary|default:'' }}">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Company</label>
+              <select name="company" class="form-select">
+                <option value="">All Companies</option>
+                {% for co in companies %}
+                  <option value="{{ co.pk }}" {% if current_filters.company == co.pk|stringformat:'s' %}selected{% endif %}>{{ co.company_name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Date Posted</label>
+              <select name="posted_within" class="form-select">
+                <option value="">Any time</option>
+                <option value="1" {% if current_filters.posted_within == '1' %}selected{% endif %}>Last 24 hours</option>
+                <option value="7" {% if current_filters.posted_within == '7' %}selected{% endif %}>Last 7 days</option>
+                <option value="30" {% if current_filters.posted_within == '30' %}selected{% endif %}>Last 30 days</option>
+              </select>
+            </div>
+            <div class="mb-4">
+              <label class="form-label">Sort By</label>
+              <select name="ordering" class="form-select">
+                <option value="-created_at" {% if current_filters.ordering == '-created_at' %}selected{% endif %}>Newest First</option>
+                <option value="-salary_max" {% if current_filters.ordering == '-salary_max' %}selected{% endif %}>Highest Salary</option>
+                <option value="salary_min" {% if current_filters.ordering == 'salary_min' %}selected{% endif %}>Lowest Salary</option>
+                <option value="created_at" {% if current_filters.ordering == 'created_at' %}selected{% endif %}>Oldest First</option>
+              </select>
+            </div>
+            <button class="btn btn-primary w-100" type="submit"><i class="bi bi-search me-2"></i> Search Jobs</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- ============ RESULTS ============ -->
+      <div class="col-lg-9">
+        <div id="jobResults" class="row g-4">
+          {% include "jobs/_job_cards.html" %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/jobs.js' %}"></script>
+{% endblock %}
